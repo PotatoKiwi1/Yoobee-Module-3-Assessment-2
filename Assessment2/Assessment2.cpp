@@ -1,5 +1,5 @@
-// Assessment2.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Yoobee College - Assessment 2 - Module 3 - Integrated Studio
+// School Lunch Ordering System - Group Assessment BERENDS, Nikolos & LOWE, Sarah
 
 #include <iostream>
 #include <iomanip> // for setprecision and setw functions
@@ -7,6 +7,8 @@ using namespace std;
 
 // Function to display the menu and return the selected item's price
 double displayMenu() {
+    cout << "School Lunch Ordering System" << endl;
+    cout << "---------------------------" << endl;
     cout << "Menu:" << endl;
     cout << "1. Chicken Sandwich - $3.50" << endl;
     cout << "2. Cheeseburger - $4.00" << endl;
@@ -74,7 +76,7 @@ int main() {
     cin >> paymentType;
 
     if (paymentType == 1) {
-        // Cash payment - ask for the amount and calculate the change
+        // Cash payment - ask for the amount and calculate the change if any.
         double cash;
         cout << "Enter the amount of cash: $";
         cin >> cash;
