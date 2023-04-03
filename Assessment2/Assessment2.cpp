@@ -82,13 +82,35 @@ int main() {
         cin >> cash;
         double change = cash - totalPrice;
         cout << fixed << setprecision(2) << "Change: $" << change << endl;
+        cout << "Invoice..." << endl;
+        cout << "----------------" << endl;
+        cout << "Total: $" << subtotal << endl;
+        cout << "Discount: $" << discount << endl;
+        cout << "Total after Discounts: $" << totalPrice << endl;
+
     }
     else if (paymentType == 2) {
         // Credit card payment - ask for the card number and confirm the payment
         string cardNumber;
-        cout << "Enter the credit card number: ";
+        cout << "Enter the credit card number: " << endl;
         cin >> cardNumber;
+
         // code for credit card payment confirmation here
+        string cvcNumber;
+        cout << "Enter the CVC Number" << endl;
+        cin >> cvcNumber;
+
+       // Expiry Date of the credit card
+        string cardDate;
+        cout << "Enter the expiry date:" << endl;
+        cin >> cardDate;
+
+        cout << "Invoice..." << endl;
+        cout << "----------------" << endl;
+        cout << "Total: $" << subtotal << endl;
+        cout << "Discount: $" << discount << endl;
+        cout << "Total after Discounts: $" << totalPrice << endl;
+        cout << "Payment has been processed, Thank you" << endl;
     }
 
     return 0;
