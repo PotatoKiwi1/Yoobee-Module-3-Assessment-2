@@ -2,7 +2,9 @@
 // School Lunch Ordering System - Group Assessment BERENDS, Nikolos & LOWE, Sarah
 
 #include <iostream>
-#include <iomanip> // for setprecision and setw functions
+#include <iomanip>
+#include <vector>
+// for setprecision and setw functions
 using namespace std;
 
 // Function to display the menu and return the selected item's price
@@ -43,31 +45,8 @@ double calculateDiscount(double totalPrice, double discountPercentage) {
     return discountPercentage * totalPrice;
 }
 
-// Main function to handle the ordering and payment process
-int main() {
-    // Display the menu and get the selected item's price
-    double price = displayMenu();
-
-    // Ask for the quantity of the selected item
-    int quantity;
-    cout << "Please enter the quantity: ";
-    cin >> quantity;
-
-    // Calculate the subtotal and display it
-    double subtotal = price * quantity;
-    cout << fixed << setprecision(2) << "Subtotal: $" << subtotal << endl;
-
-    // Ask for the discount percentage and calculate the discount
-    double discountPercentage;
-    cout << "Enter the discount percentage (0-100): ";
-    cin >> discountPercentage;
-    double discount = calculateDiscount(subtotal, discountPercentage / 100.0);
-    cout << fixed << setprecision(2) << "Discount: $" << discount << endl;
-
-    // Calculate the total price and display it
-    double totalPrice = subtotal - discount;
-    cout << fixed << setprecision(2) << "Total Price: $" << totalPrice << endl;
-
+// Function for payment process
+void processPayment(double totalPrice, double subtotal, double discount) {
     // Ask for the payment type and handle the payment process
     int paymentType;
     cout << "Select a payment type:" << endl;
@@ -100,7 +79,7 @@ int main() {
         cout << "Enter the CVC Number" << endl;
         cin >> cvcNumber;
 
-       // Expiry Date of the credit card
+        // Expiry Date of the credit card
         string cardDate;
         cout << "Enter the expiry date:" << endl;
         cin >> cardDate;
@@ -112,6 +91,92 @@ int main() {
         cout << "Total after Discounts: $" << totalPrice << endl;
         cout << "Payment has been processed, Thank you" << endl;
     }
+}
 
-    return 0;
+// Function for ordering system
+double openOrderingSystem() {
+    // Display the menu and get the selected item's price
+    double price = displayMenu();
+
+    // Ask for the quantity of the selected item
+    int quantity;
+    cout << "Please enter the quantity: ";
+    cin >> quantity;
+
+    // Calculate the subtotal and display it
+    double subtotal = price * quantity;
+    cout << fixed << setprecision(2) << "Subtotal: $" << subtotal << endl;
+
+    // Ask for the discount percentage and calculate the discount
+    double discountPercentage;
+    cout << "Enter the discount percentage (0-100): ";
+    cin >> discountPercentage;
+    double discount = calculateDiscount(subtotal, discountPercentage / 100.0);
+
+    // Declare totalPrice here
+    double totalPrice;
+
+    // Calculate the total price and display it
+    totalPrice = subtotal - discount;
+    cout << fixed << setprecision(2) << "Total Price: $" << totalPrice << endl;
+
+    // Call processPayment with the calculated values
+    processPayment(totalPrice, subtotal, discount);
+
+    return totalPrice;
+}
+
+// Main function to handle the ordering and payment process
+int main() {
+    // Sign-in menu
+    string username, password;
+    cout << "---------" << endl;
+    cout << "Sign On" << endl;
+    cout << "---------" << endl;
+    cout << "Please enter your username: ";
+    cin >> username;
+    cout << "Please enter your password: ";
+    cin >> password;
+    if (username == "admin" && password == "adminpassword") {
+        // Administrator menu
+        cout << "Welcome, Admin!" << endl;
+        cout << "Please select from the following options:" << endl;
+        cout << "1. Create a new User" << endl;
+        cout << "2. Open the Ordering system" << endl;
+        int selection;
+        cin >> selection;
+        switch (selection) {
+        case 1:
+            // Code to create a new user
+            break;
+        case 2:
+            // Code to open the ordering system
+            openOrderingSystem();
+            break;
+        default:
+            cout << "Invalid selection. Exiting program." << endl;
+            return 0;
+        }
+    }
+    else if (username == "user" && password == "userpassword") {
+        // User menu
+        cout << "Welcome to the Ordering System" << endl;
+        cout << "Please select from the following options:" << endl;
+        cout << "1. Open the Ordering System" << endl;
+        int selection;
+        cin >> selection;
+        switch (selection) {
+        case 1:
+            // Code to open the ordering system
+            openOrderingSystem();
+            break;
+        default:
+            cout << "Invalid selection. Exiting program." << endl;
+            return 0;
+        }
+    }
+    else {
+        cout << "Invalid username or password. Exiting program." << endl;
+        return 0;
+    }
 }
