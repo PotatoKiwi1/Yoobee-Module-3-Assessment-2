@@ -5,53 +5,33 @@
 #include <iomanip>
 #include <vector>
 #include <fstream>
+#include <string>
 
 using namespace std;
 
 // Function to display the menu and return the selected item's price
-double displayMenu() {
-    cout << "School Lunch Ordering System" << endl;
-    cout << "---------------------------" << endl;
-    cout << "Menu:" << endl;
-    cout << "1. Chicken Sandwich - $3.50" << endl;
-    cout << "2. Cheeseburger - $4.00" << endl;
-    cout << "3. Veggie Wrap - $3.00" << endl;
-    cout << "4. Garden Salad - $2.50" << endl;
-    cout << "Please select an item (1-4): ";
-    int selection;
-    cin >> selection;
-    double price = 0.0;
-    switch (selection) {
-    case 1:
-        price = 3.50;
-        break;
-    case 2:
-        price = 4.00;
-        break;
-    case 3:
-        price = 3.00;
-        break;
-    case 4:
-        price = 2.50;
-        break;
-    default:
-        cout << "Invalid selection. Please try again." << endl;
-        price = displayMenu();
-    }
-    return price;
-}
+
+const int NUM_MENU_ITEMS = 999;
 
 struct User {
     string username;
     string password;
 };
 
+struct Menu {
+    string item;
+    string price;
+    string index;
+};
+
 vector<User> users;
+vector<Menu> menu;
 bool is_authenticated = false;
 bool is_admin = false;
 bool is_running = true;
 string current_user = "";
 string credentials_file = "users.txt";
+string menu_files = "menu.txt";
 
 void loadCredentials() {
     ifstream infile(credentials_file);
@@ -73,6 +53,42 @@ void saveCredentials() {
         file << user.username << " " << user.password << endl;
     }
     file.close();
+}
+
+void loadMenu() {
+    ifstream infile(menu_files);
+    if (!infile.is_open()) {
+        cerr << "Error: menu file could not be opened." << endl;
+        exit(1);
+    }
+    int itemNumber = 1;
+    string menuItem;
+    double itemPrice;
+    while (infile >> menuItem >> itemPrice) {
+        cout << itemNumber << ". " << menuItem << " - $" << itemPrice << endl;
+        itemNumber++;
+    }
+    infile.close();
+}
+
+void saveMenu() {
+    ofstream file(menu_files, ios::app); // open the file in append mode
+    for (Menu menu : menu) {
+        file << menu.item << " " << menu.price << endl;
+    }
+    file.close();
+}
+
+void createMenuItem() {
+    Menu MenuItem;
+    cout << "Enter a new menu item: ";
+    cin >> MenuItem.item;
+    cout << "Enter a new price: ";
+    cin >> MenuItem.price;
+    MenuItem.index = menu.size(); // Set the index to the current size of the menu vector
+    menu.push_back(MenuItem);
+    saveMenu();
+    cout << "New menu item created successfully." << endl;
 }
 
 void createUser() {
@@ -102,6 +118,9 @@ bool authenticateUser(string username, string password) {
 
 void signIn() {
     while (!is_authenticated) {
+        cout << "------------" << endl;
+        cout << "Sign In Menu" << endl;
+        cout << "------------" << endl;
         string username, password;
         cout << "Enter username: ";
         cin >> username;
@@ -114,6 +133,15 @@ void signIn() {
             cout << "Invalid username or password. Please try again." << endl;
         }
     }
+}
+
+double displayMenuItems() {
+    double price = 0.0;
+    for (Menu menuItem : menu) {
+        cout << menuItem.item << " " << menuItem.price << endl;
+        price += stod(menuItem.price);
+    }
+    return price;
 }
 
 // Function to calculate the discount based on the total price and user-defined percentage
@@ -167,31 +195,45 @@ void processPayment(double totalPrice, double subtotal, double discount) {
     }
 }
 
+
 // Function for ordering system
 double openOrderingSystem() {
+    loadMenu();
 
-    double price = displayMenu();
+    int selection;
+    cout << "Select an option: ";
+    cin >> selection;
 
-    int quantity;
-    cout << "Please enter the quantity: ";
-    cin >> quantity;
+    ifstream infile(menu_files);
+    if (!infile.is_open()) {
+        cerr << "Error: menu file could not be opened." << endl;
+        exit(1);
+    }
+    int itemNumber = 1;
+    string menuItem;
+    double itemPrice;
+    while (infile >> menuItem >> itemPrice) {
+        if (itemNumber == selection) {
+            infile.close();
+            int quantity;
+            cout << "Please enter the quantity: ";
+            cin >> quantity;
+            double subtotal = itemPrice * quantity;
+            double discountPercentage = 0.0;
+            if (subtotal >= 50.0) {
+                discountPercentage = 0.1;
+            }
+            double discount = calculateDiscount(subtotal, discountPercentage);
+            double totalPrice = subtotal - discount;
+            processPayment(totalPrice, subtotal, discount);
+            return totalPrice;
+        }
+        itemNumber++;
+    }
+    infile.close();
 
-    double subtotal = price * quantity;
-    cout << fixed << setprecision(2) << "Subtotal: $" << subtotal << endl;
-
-    double discountPercentage;
-    cout << "Enter the discount percentage (0-100): ";
-    cin >> discountPercentage;
-    double discount = calculateDiscount(subtotal, discountPercentage / 100.0);
-
-    double totalPrice;
-
-    totalPrice = subtotal - discount;
-    cout << fixed << setprecision(2) << "Total Price: $" << totalPrice << endl;
-
-    processPayment(totalPrice, subtotal, discount);
-
-    return totalPrice;
+    cerr << "Error: invalid selection." << endl;
+    exit(1);
 }
 
 void signOut() {
@@ -204,26 +246,32 @@ void signOut() {
 void adminMenu() {
     int selection;
     while (is_admin == true) {
+        cout << "----------" << endl;
         cout << "Admin Menu" << endl;
         cout << "----------" << endl;
         cout << "1. Create new user" << endl;
-        cout << "2. Sign out" << endl;
-        cout << "3. Exit" << endl;
-        cout << "Please select an option (1-2): ";
+        cout << "2. Create new menu item" << endl;
+        cout << "3. Sign out" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Please select an option (1-4): ";
         cin >> selection;
         switch (selection) {
         case 1:
             createUser();
             break;
         case 2:
-            signOut();
+            createMenuItem();
             break;
         case 3:
+            signOut();
+            break;
+        case 4:
             is_running = false;
             signOut();
             break;
         default:
             cout << "Invalid selection. Please try again." << endl;
+
             adminMenu();
         }
     }
@@ -232,12 +280,13 @@ void adminMenu() {
 
 void userMenu() {
     int selection;
+    cout << "---------" << endl;
     cout << "User Menu" << endl;
     cout << "---------" << endl;
     cout << "1. Open ordering system" << endl;
     cout << "2. Sign out" << endl;
     cout << "3. Exit" << endl;
-    cout << "Please select an option (1-2): ";
+    cout << "Please select an option (1-3): ";
     cin >> selection;
     switch (selection) {
     case 1:

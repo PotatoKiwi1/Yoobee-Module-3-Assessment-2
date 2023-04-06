@@ -1,0 +1,4 @@
+Burger 5.00
+Chips 2.00
+Kebab 6.00
+Cabbage 10.00
