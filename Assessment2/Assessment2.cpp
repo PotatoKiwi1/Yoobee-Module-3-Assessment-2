@@ -4,7 +4,8 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-// for setprecision and setw functions
+#include <fstream>
+
 using namespace std;
 
 // Function to display the menu and return the selected item's price
@@ -40,14 +41,89 @@ double displayMenu() {
     return price;
 }
 
+struct User {
+    string username;
+    string password;
+};
+
+vector<User> users;
+bool is_authenticated = false;
+bool is_admin = false;
+bool is_running = true;
+string current_user = "";
+string credentials_file = "users.txt";
+
+void loadCredentials() {
+    ifstream infile(credentials_file);
+    if (!infile.is_open()) {
+        cerr << "Error: credentials file could not be opened." << endl;
+        exit(1);
+    }
+    string username, password;
+    while (infile >> username >> password) {
+        User user = { username, password };
+        users.push_back(user);
+    }
+    infile.close();
+}
+
+void saveCredentials() {
+    ofstream file(credentials_file);
+    for (User user : users) {
+        file << user.username << " " << user.password << endl;
+    }
+    file.close();
+}
+
+void createUser() {
+    User newUser;
+    cout << "Enter a new username: ";
+    cin >> newUser.username;
+    cout << "Enter a new password: ";
+    cin >> newUser.password;
+    users.push_back(newUser);
+    saveCredentials();
+    cout << "New user created successfully." << endl;
+}
+
+bool authenticateUser(string username, string password) {
+    for (User user : users) {
+        if (user.username == username && user.password == password) {
+
+            is_authenticated = true;
+            current_user = username;
+            is_admin = (username == "admin");
+
+            return true;
+        }
+    }
+    return false;
+}
+
+void signIn() {
+    while (!is_authenticated) {
+        string username, password;
+        cout << "Enter username: ";
+        cin >> username;
+        cout << "Enter password: ";
+        cin >> password;
+        if (authenticateUser(username, password)) {
+            cout << "Login successful." << endl;
+        }
+        else {
+            cout << "Invalid username or password. Please try again." << endl;
+        }
+    }
+}
+
 // Function to calculate the discount based on the total price and user-defined percentage
 double calculateDiscount(double totalPrice, double discountPercentage) {
     return discountPercentage * totalPrice;
 }
 
-// Function for payment process
+// Function for payment processing - cash or credit card
 void processPayment(double totalPrice, double subtotal, double discount) {
-    // Ask for the payment type and handle the payment process
+
     int paymentType;
     cout << "Select a payment type:" << endl;
     cout << "1. Cash" << endl;
@@ -74,12 +150,10 @@ void processPayment(double totalPrice, double subtotal, double discount) {
         cout << "Enter the credit card number: " << endl;
         cin >> cardNumber;
 
-        // code for credit card payment confirmation here
         string cvcNumber;
         cout << "Enter the CVC Number" << endl;
         cin >> cvcNumber;
 
-        // Expiry Date of the credit card
         string cardDate;
         cout << "Enter the expiry date:" << endl;
         cin >> cardDate;
@@ -95,88 +169,107 @@ void processPayment(double totalPrice, double subtotal, double discount) {
 
 // Function for ordering system
 double openOrderingSystem() {
-    // Display the menu and get the selected item's price
+
     double price = displayMenu();
 
-    // Ask for the quantity of the selected item
     int quantity;
     cout << "Please enter the quantity: ";
     cin >> quantity;
 
-    // Calculate the subtotal and display it
     double subtotal = price * quantity;
     cout << fixed << setprecision(2) << "Subtotal: $" << subtotal << endl;
 
-    // Ask for the discount percentage and calculate the discount
     double discountPercentage;
     cout << "Enter the discount percentage (0-100): ";
     cin >> discountPercentage;
     double discount = calculateDiscount(subtotal, discountPercentage / 100.0);
 
-    // Declare totalPrice here
     double totalPrice;
 
-    // Calculate the total price and display it
     totalPrice = subtotal - discount;
     cout << fixed << setprecision(2) << "Total Price: $" << totalPrice << endl;
 
-    // Call processPayment with the calculated values
     processPayment(totalPrice, subtotal, discount);
 
     return totalPrice;
 }
 
-// Main function to handle the ordering and payment process
-int main() {
-    // Sign-in menu
-    string username, password;
-    cout << "---------" << endl;
-    cout << "Sign On" << endl;
-    cout << "---------" << endl;
-    cout << "Please enter your username: ";
-    cin >> username;
-    cout << "Please enter your password: ";
-    cin >> password;
-    if (username == "admin" && password == "adminpassword") {
-        // Administrator menu
-        cout << "Welcome, Admin!" << endl;
-        cout << "Please select from the following options:" << endl;
-        cout << "1. Create a new User" << endl;
-        cout << "2. Open the Ordering system" << endl;
-        int selection;
+void signOut() {
+    is_authenticated = false;
+    is_admin = false;
+    current_user = "";
+    cout << "Logout successful." << endl;
+}
+
+void adminMenu() {
+    int selection;
+    while (is_admin == true) {
+        cout << "Admin Menu" << endl;
+        cout << "----------" << endl;
+        cout << "1. Create new user" << endl;
+        cout << "2. Sign out" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Please select an option (1-2): ";
         cin >> selection;
         switch (selection) {
         case 1:
-            // Code to create a new user
+            createUser();
             break;
         case 2:
-            // Code to open the ordering system
-            openOrderingSystem();
+            signOut();
+            break;
+        case 3:
+            is_running = false;
+            signOut();
             break;
         default:
-            cout << "Invalid selection. Exiting program." << endl;
-            return 0;
+            cout << "Invalid selection. Please try again." << endl;
+            adminMenu();
         }
     }
-    else if (username == "user" && password == "userpassword") {
-        // User menu
-        cout << "Welcome to the Ordering System" << endl;
-        cout << "Please select from the following options:" << endl;
-        cout << "1. Open the Ordering System" << endl;
-        int selection;
-        cin >> selection;
-        switch (selection) {
-        case 1:
-            // Code to open the ordering system
-            openOrderingSystem();
-            break;
-        default:
-            cout << "Invalid selection. Exiting program." << endl;
-            return 0;
+
+}
+
+void userMenu() {
+    int selection;
+    cout << "User Menu" << endl;
+    cout << "---------" << endl;
+    cout << "1. Open ordering system" << endl;
+    cout << "2. Sign out" << endl;
+    cout << "3. Exit" << endl;
+    cout << "Please select an option (1-2): ";
+    cin >> selection;
+    switch (selection) {
+    case 1:
+        openOrderingSystem();
+        break;
+    case 2:
+        signOut();
+        break;
+    case 3:
+        is_running = false;
+        signOut();
+        break;
+    default:
+        cout << "Invalid selection. Please try again." << endl;
+        userMenu();
+    }
+}
+
+// main function to call the sign in ansign out functions and the ordering system
+
+int main() {
+
+    loadCredentials();
+
+    while (is_running) {
+        signIn();
+        if (is_admin) {
+            adminMenu();
+        }
+        else {
+            userMenu();
         }
     }
-    else {
-        cout << "Invalid username or password. Exiting program." << endl;
-        return 0;
-    }
+
 }
