@@ -212,6 +212,7 @@ double openOrderingSystem() {
     loadMenu();
 
     int selection;
+    cout << "Purchases over $50 automatically receive discount of 10%" << endl;
     cout << "Select an option: ";
     cin >> selection;
 
