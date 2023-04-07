@@ -13,11 +13,13 @@ using namespace std;
 
 const int NUM_MENU_ITEMS = 999;
 
+// Defines a structure named User which represents the users of the application. It then stores the username and password. 
 struct User {
     string username;
     string password;
 };
 
+// Much the same as the Struct User, this does the same but with them Menu Items and their price. 
 struct Menu {
     string item;
     string price;
@@ -33,8 +35,9 @@ string current_user = "";
 string credentials_file = "users.txt";
 string menu_files = "menu.txt";
 
+// Reads the user credentials from the “users.txt” file and stores them in a sector of User Structs
 void loadCredentials() {
-    ifstream infile(credentials_file);
+    ifstream infile(credentials_file, ios::app); // open the file in append mode so as not to overwrite any already existing menu items. 
     if (!infile.is_open()) {
         cerr << "Error: credentials file could not be opened." << endl;
         exit(1);
@@ -47,6 +50,7 @@ void loadCredentials() {
     infile.close();
 }
 
+// Writes the user credentials to the “users.txt” file. 
 void saveCredentials() {
     ofstream file(credentials_file);
     for (User user : users) {
@@ -55,6 +59,7 @@ void saveCredentials() {
     file.close();
 }
 
+// Reads the menu items and their prices from the “menu.txt” file and displays them on the console. 
 void loadMenu() {
     ifstream infile(menu_files);
     if (!infile.is_open()) {
@@ -71,14 +76,16 @@ void loadMenu() {
     infile.close();
 }
 
+// Appends new menu items and their prices to the “menu.txt” file.
 void saveMenu() {
-    ofstream file(menu_files, ios::app); // open the file in append mode
+    ofstream file(menu_files, ios::app); // open the file in append mode so as not to overwrite any already existing menu items. 
     for (Menu menu : menu) {
         file << menu.item << " " << menu.price << endl;
     }
     file.close();
 }
 
+// Allows an admin user to create a new menu item and its price, which then call saveMenu to write the newly created menu item to the “menu.txt” file.  
 void createMenuItem() {
     Menu MenuItem;
     cout << "Enter a new menu item: ";
@@ -91,6 +98,7 @@ void createMenuItem() {
     cout << "New menu item created successfully." << endl;
 }
 
+// Allows the admin user to create a new user and their password, which then calls saveCredentials to write the newly created credentials to the “users.txt” file. 
 void createUser() {
     User newUser;
     cout << "Enter a new username: ";
@@ -102,6 +110,7 @@ void createUser() {
     cout << "New user created successfully." << endl;
 }
 
+// Takes a username and password as arguments and checks if the user is authenticated by comparing the input to the credentials store in the users vector. This will return true if the user is authenticated or false otherwise. 
 bool authenticateUser(string username, string password) {
     for (User user : users) {
         if (user.username == username && user.password == password) {
@@ -116,6 +125,7 @@ bool authenticateUser(string username, string password) {
     return false;
 }
 
+// Prompts the user to sign in by entering their username and password. If the input is valid, the user is authenticated, and their name is stored in the current user variable. 
 void signIn() {
     while (!is_authenticated) {
         cout << "------------" << endl;
@@ -135,6 +145,7 @@ void signIn() {
     }
 }
 
+// Displays the menu items and their prices on the console and returns the total price of the items.  
 double displayMenuItems() {
     double price = 0.0;
     for (Menu menuItem : menu) {
@@ -196,7 +207,7 @@ void processPayment(double totalPrice, double subtotal, double discount) {
 }
 
 
-// Function for ordering system
+// Initializes the database, sets up the initial menu, and then enters a loop that repeatedly displays the menu and prompts the user for input until the user chooses to exit the program.
 double openOrderingSystem() {
     loadMenu();
 
@@ -236,6 +247,7 @@ double openOrderingSystem() {
     exit(1);
 }
 
+// Removes the is_authenticated and is_admin tags from the currently signed in user. It then pushes back to the sign in screen. 
 void signOut() {
     is_authenticated = false;
     is_admin = false;
@@ -243,6 +255,7 @@ void signOut() {
     cout << "Logout successful." << endl;
 }
 
+// When the user logs in as an administrator. It displays a menu of options that the admin can choose from, such as adding or removing items from the menu, viewing orders, and updating the status of orders.
 void adminMenu() {
     int selection;
     while (is_admin == true) {
@@ -278,6 +291,7 @@ void adminMenu() {
 
 }
 
+// This is called when the user logs in as a regular user. It displays a menu of options that the user can choose from, such as placing a new order, viewing their previous orders, and updating their account information.
 void userMenu() {
     int selection;
     cout << "---------" << endl;
@@ -305,7 +319,7 @@ void userMenu() {
     }
 }
 
-// main function to call the sign in ansign out functions and the ordering system
+// This is the entry point of the program. It initializes the database, sets up the initial menu, and then enters a loop that repeatedly displays the menu and prompts the user for input until the user chooses to exit the program.
 
 int main() {
 
